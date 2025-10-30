@@ -21,21 +21,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download Godot Headless 4.2.2
+      - name: Download Godot Headless 4.5.1
         run: |
           mkdir -p godot
-          wget -q https://downloads.tuxfamily.org/godotengine/4.2.2/mono/Godot_v4.2.2-stable_linux_headless.64.zip -O godot/headless.zip || \
-            wget -q https://downloads.tuxfamily.org/godotengine/4.2.2/Godot_v4.2.2-stable_linux_headless.64.zip -O godot/headless.zip
+          curl -L "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux_headless.64.zip" -o godot/headless.zip
           unzip -q godot/headless.zip -d godot
-          mv godot/Godot_v4.2.2-stable_linux_headless.64 godot/godot-headless
+          mv godot/Godot_v4.5.1-stable_linux_headless.64 godot/godot-headless
           chmod +x godot/godot-headless
 
       - name: Install export templates
         run: |
-          wget -q https://downloads.tuxfamily.org/godotengine/4.2.2/Godot_v4.2.2-stable_export_templates.zip -O templates.zip
-          unzip -q templates.zip -d templates
-          mkdir -p ~/.local/share/godot/export_templates/4.2.2.stable
-          cp -r templates/templates/. ~/.local/share/godot/export_templates/4.2.2.stable
+          curl -L "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz" -o templates.tpz
+          unzip -q templates.tpz -d templates
+          mkdir -p ~/.local/share/godot/export_templates/4.5.1.stable
+          cp -r templates/templates/. ~/.local/share/godot/export_templates/4.5.1.stable
 
       - name: Export Web build
         run: |
