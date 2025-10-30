@@ -24,6 +24,7 @@ jobs:
       - name: Download Godot Headless 4.5.1
         run: |
           mkdir -p godot
+          curl -L "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_linux_headless.64.zip" -o godot/headless.zip || \
           curl -L "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux_headless.64.zip" -o godot/headless.zip
           unzip -q godot/headless.zip -d godot
           mv godot/Godot_v4.5.1-stable_linux_headless.64 godot/godot-headless
@@ -31,7 +32,8 @@ jobs:
 
       - name: Install export templates
         run: |
-          curl -L "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz" -o templates.tpz
+          curl -L "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz" -o templates.tpz || \
+          curl -L "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_export_templates.tpz" -o templates.tpz
           unzip -q templates.tpz -d templates
           mkdir -p ~/.local/share/godot/export_templates/4.5.1.stable
           cp -r templates/templates/. ~/.local/share/godot/export_templates/4.5.1.stable
