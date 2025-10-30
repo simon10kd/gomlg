@@ -22,18 +22,65 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Godot Headless 4.5.1
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p godot
-          curl -L "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_linux_headless.64.zip" -o godot/headless.zip || \
-          curl -L "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux_headless.64.zip" -o godot/headless.zip
+          urls=(
+            "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_linux_headless.64.zip"
+            "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux_headless.64.zip"
+            "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux_headless.64.zip"
+          )
+          success=false
+          for url in "${urls[@]}"; do
+            echo "Attempting download from $url"
+            rm -f godot/headless.zip
+            if curl -fL --retry 5 --retry-delay 5 "$url" -o godot/headless.zip; then
+              if unzip -tq godot/headless.zip >/dev/null; then
+                success=true
+                break
+              else
+                echo "Downloaded file failed unzip test, retrying next mirror..."
+              fi
+            else
+              echo "Download failed for $url"
+            fi
+          done
+          if [ "$success" != true ]; then
+            echo "Unable to download Godot headless binary from any mirror" >&2
+            exit 1
+          fi
           unzip -q godot/headless.zip -d godot
           mv godot/Godot_v4.5.1-stable_linux_headless.64 godot/godot-headless
           chmod +x godot/godot-headless
 
       - name: Install export templates
+        shell: bash
         run: |
-          curl -L "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz" -o templates.tpz || \
-          curl -L "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_export_templates.tpz" -o templates.tpz
+          set -euo pipefail
+          urls=(
+            "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz"
+            "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_export_templates.tpz"
+          )
+          success=false
+          for url in "${urls[@]}"; do
+            echo "Attempting template download from $url"
+            rm -f templates.tpz
+            if curl -fL --retry 5 --retry-delay 5 "$url" -o templates.tpz; then
+              if unzip -tq templates.tpz >/dev/null; then
+                success=true
+                break
+              else
+                echo "Template archive failed unzip test, retrying next mirror..."
+              fi
+            else
+              echo "Download failed for $url"
+            fi
+          done
+          if [ "$success" != true ]; then
+            echo "Unable to download export templates from any mirror" >&2
+            exit 1
+          fi
           unzip -q templates.tpz -d templates
           mkdir -p ~/.local/share/godot/export_templates/4.5.1.stable
           cp -r templates/templates/. ~/.local/share/godot/export_templates/4.5.1.stable
