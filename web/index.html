@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Get Out Of My Lawn — Web</title>
+  <style>
+    html, body { height: 100%; margin: 0; background: #1a1a1a; color: #ddd; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    #game { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    canvas { width: 100%; height: 100%; display: block; background: #000; }
+    #status { position: absolute; top: 12px; left: 12px; padding: 6px 10px; background: rgba(0,0,0,0.5); border-radius: 6px; font-size: 14px; }
+  </style>
+  <!-- Note: The following expects a Godot Web export placed in ../build/web/ -->
+</head>
+<body>
+  <div id="game">
+    <div id="status">Loading… If this persists, build the Web export.</div>
+  </div>
+
+  <!-- Replace the paths below after exporting from Godot to Web. -->
+  <script>
+    (function() {
+      const base = '../build/web/';
+      const files = {
+        loader: base + 'GetOutOfMyLawn.loader.js',
+        wasm: base + 'GetOutOfMyLawn.wasm',
+        pck: base + 'GetOutOfMyLawn.pck'
+      };
+
+      function start() {
+        const status = document.getElementById('status');
+        if (!('fetch' in window)) {
+          status.textContent = 'Your browser is missing required features for WebAssembly.';
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = files.loader;
+        script.onload = function() {
+          const config = {
+            executable: 'GetOutOfMyLawn',
+            canvasResizePolicy: 2,
+            focusCanvas: true,
+            unloadAfterInit: true,
+            canvas: (function() {
+              const c = document.createElement('canvas');
+              document.getElementById('game').appendChild(c);
+              return c;
+            })(),
+            // These will be resolved by the loader
+            mainPack: files.pck,
+            wasmUrl: files.wasm
+          };
+          createEngineInstance(config.canvas, config).then(function(engine) {
+            status.remove();
+            engine.startGame();
+          }).catch(function(e) {
+            console.error(e);
+            status.textContent = 'Failed to start the game. Did you export the Web build?';
+          });
+        };
+        script.onerror = function() {
+          status.textContent = 'Loader not found. Export the project for Web to ../build/web/';
+        };
+        document.body.appendChild(script);
+      }
+      start();
+    })();
+  </script>
+</body>
+</html>
+
+

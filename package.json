@@ -1,0 +1,39 @@
+{
+  "name": "gomlg",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Get Out Of My Lawn - dev server for web build",
+  "scripts": {
+    "predev": "rm -f .tmp/dev-opened && mkdir -p node_modules && touch node_modules/.gdignore",
+    "dev": "run-p watch:export serve",
+    "serve": "nodemon",
+    "watch:export": "node tools/export-watch.js",
+    "start": "node server.js"
+  },
+  "devDependencies": {
+    "chokidar": "^3.6.0",
+    "nodemon": "^3.1.0",
+    "npm-run-all": "^4.1.5"
+  },
+  "dependencies": {
+    "connect-livereload": "^0.6.1",
+    "express": "^4.19.2",
+    "livereload": "^0.9.3",
+    "open": "^9.1.0"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "server.js",
+      "web",
+      "docs",
+      "build/web"
+    ],
+    "ext": "js,json,html,css,wasm,pck",
+    "ignore": [
+      "node_modules"
+    ],
+    "exec": "node server.js"
+  }
+}
+
+
