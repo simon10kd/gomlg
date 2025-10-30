@@ -27,9 +27,9 @@ jobs:
           set -euo pipefail
           mkdir -p godot
           urls=(
-            "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_linux_headless.64.zip"
-            "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux_headless.64.zip"
-            "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux_headless.64.zip"
+            "https://downloads.tuxfamily.org/godotengine/4.5.1/Godot_v4.5.1-stable_linux.x86_64.zip"
+            "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
+            "https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip"
           )
           success=false
           for url in "${urls[@]}"; do
@@ -51,7 +51,7 @@ jobs:
             exit 1
           fi
           unzip -q godot/headless.zip -d godot
-          mv godot/Godot_v4.5.1-stable_linux_headless.64 godot/godot-headless
+          mv godot/Godot_v4.5.1-stable_linux.x86_64 godot/godot-headless
           chmod +x godot/godot-headless
 
       - name: Install export templates
