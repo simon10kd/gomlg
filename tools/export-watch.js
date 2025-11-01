@@ -28,6 +28,26 @@ if (!godotBin) {
 
 console.log(`[export] Using Godot binary at: ${godotBin}`);
 
+// Check for export templates
+const os = require('os');
+const homeDir = os.homedir();
+const templatePaths = [
+  path.join(homeDir, 'Library', 'Application Support', 'Godot', 'export_templates', '4.2.2.stable', 'web_release.zip'),
+  path.join(homeDir, 'Library', 'Application Support', 'Godot', 'export_templates', '4.2.stable', 'web_release.zip')
+];
+const templatesExist = templatePaths.some(tp => fs.existsSync(tp));
+const exportExists = fs.existsSync(path.join(projectRoot, 'docs', 'index.html'));
+
+if (!templatesExist && !exportExists) {
+  console.warn('[export] ⚠️  Export templates not found, but no existing export detected.');
+  console.warn('[export] Please install export templates in Godot (Project → Export → Install Export Templates...)');
+  console.warn('[export] Or manually export once, then the watcher will skip auto-export.');
+} else if (!templatesExist && exportExists) {
+  console.log('[export] ℹ️  Export templates not found, but existing export files detected in docs/');
+  console.log('[export] Auto-export disabled. To enable, install export templates in Godot.');
+  console.log('[export] Watcher will continue monitoring but skip exports.');
+}
+
 const watchPaths = [
   path.join(projectRoot, 'project.godot'),
   path.join(projectRoot, 'scenes'),
@@ -44,6 +64,26 @@ let exporting = false;
 let queueExport = false;
 
 function runExport(reason) {
+  // Check if templates exist before attempting export
+  if (!templatesExist) {
+    if (exportExists) {
+      console.log('[export] Skipping export (templates not installed, using existing export files).');
+      exporting = false;
+      if (queueExport) {
+        queueExport = false;
+      }
+      return;
+    } else {
+      console.error('[export] ❌ Cannot export: templates missing and no existing export found.');
+      console.error('[export] Please install export templates in Godot or export manually.');
+      exporting = false;
+      if (queueExport) {
+        queueExport = false;
+      }
+      return;
+    }
+  }
+
   exporting = true;
   queueExport = false;
 
@@ -65,6 +105,10 @@ function runExport(reason) {
       console.log('[export] ✅ Web export updated (docs/index.*).');
     } else {
       console.error(`[export] ❌ Export failed with code ${code}.`);
+      // Don't fail completely if it's a template error and export exists
+      if (code !== 0 && exportExists && !templatesExist) {
+        console.log('[export] Continuing with existing export files...');
+      }
     }
     if (queueExport) {
       runExport('queued change');
